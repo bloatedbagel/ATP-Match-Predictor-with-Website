@@ -1,0 +1,52 @@
+name: Train model and deploy to GitHub Pages
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"   # every Monday 06:00 UTC: retrain on the newest matches and redeploy
+  workflow_dispatch:       # lets you run it by hand from the Actions tab
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1) Train the model ONCE here (not in every visitor's browser) and export it to web/public/model.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      - run: python python/test_predictor.py
+      - run: python python/export_model.py
+
+      # 2) Build the website, which bundles model.json as a static file
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
