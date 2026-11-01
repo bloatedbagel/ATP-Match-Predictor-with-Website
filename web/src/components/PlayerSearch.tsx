@@ -18,7 +18,7 @@ export default function PlayerSearch({ id, label, players, value, onChange }: Pr
 
   const matches = useMemo(() => {
     const q = norm(query ?? "");
-    return players.filter((p) => norm(p.name).includes(q)).slice(0, 8);
+    return players.filter((p) => norm(p.name).includes(q));
   }, [players, query]);
 
   const choose = (p: PlayerInfo) => {
@@ -26,10 +26,15 @@ export default function PlayerSearch({ id, label, players, value, onChange }: Pr
     setQuery(null);
     setOpen(false);
   };
+  
+  const move = (next: number) => {
+    setHi(next);
+    requestAnimationFrame(() => document.getElementById(`${id}-opt-${next}`)?.scrollIntoView({ block: "nearest" }));
+  };
 
   const onKey = (e: KeyboardEvent) => {
-    if (e.key === "ArrowDown") { e.preventDefault(); setOpen(true); setHi((hi + 1) % Math.max(matches.length, 1)); }
-    else if (e.key === "ArrowUp") { e.preventDefault(); setHi((hi + matches.length - 1) % Math.max(matches.length, 1)); }
+    if (e.key === "ArrowDown") { e.preventDefault(); setOpen(true); move((hi + 1) % Math.max(matches.length, 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); move((hi + matches.length - 1) % Math.max(matches.length, 1)); }
     else if (e.key === "Enter" && open && matches[hi]) { e.preventDefault(); choose(matches[hi]); }
     else if (e.key === "Escape") { setOpen(false); setQuery(null); }
   };
@@ -52,7 +57,7 @@ export default function PlayerSearch({ id, label, players, value, onChange }: Pr
         onKeyDown={onKey}
       />
       {open && (
-        <ul id={`${id}-list`} role="listbox">
+        <ul key={query ?? ""} id={`${id}-list`} role="listbox" onMouseDown={(e) => e.preventDefault()}>
           {matches.length === 0 && <li className="none">No player found</li>}
           {matches.map((p, i) => (
             <li
