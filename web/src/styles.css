@@ -43,8 +43,7 @@ tr:last-child td { border-bottom: 0; }
 
 input { padding: 11px 10px; font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
 .search { position: relative; }
-.search ul { position: absolute; z-index: 5; left: 0; right: 0; margin: 4px 0 0; padding: 4px; list-style: none; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,.18); }
-.search li { display: flex; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 4px; cursor: pointer; }
+.search ul { position: absolute; z-index: 5; left: 0; right: 0; margin: 4px 0 0; padding: 4px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; list-style: none; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,.18); }.search li { display: flex; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 4px; cursor: pointer; }
 .search li[aria-selected="true"] { background: var(--ink); color: var(--bg); }
 .search li small { opacity: .75; white-space: nowrap; }
 .search li.none { cursor: default; color: var(--mute); }
